@@ -32,6 +32,8 @@ checkDependencies <- function(method, fct = missingDependenciesMessage){
     fct("mgcv", method)
     fct("glmnet", method)
     fct("mboost", method)
+  }else if(method == "PythonCDAlgo"){
+    fct("reticulate", method)
   }else{
     stop(paste("Method", method, "not (yet?) implemented."))
   }

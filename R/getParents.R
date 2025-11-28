@@ -219,7 +219,7 @@ getParents <- function(X, environment = NULL, interventions = NULL,
                                  "fci", "fciplus", "ges", "gies", "hiddenICP",
                                  "ICP", "LINGAM", "mmhc", "rankArges",  "rankFci",
                                  "rankGes", "rankGies", "rankPc", "rfci", "pc",
-                                 "regression")[12],  
+                                 "regression", "PythonCDAlgo")[12],  
                        alpha = 0.1, 
                        mode = c("raw", "parental", "ancestral")[1],
                        variableSelMat = NULL,
@@ -462,6 +462,13 @@ getParents <- function(X, environment = NULL, interventions = NULL,
            "RESIT" = {
              result <- runRESIT(X, parentsOf, alpha, setOptions, verbose, 
                                ...)
+           },
+           
+           "PythonCDAlgo" = {
+             result <- runPythonCDAlgo(X, parentsOf, alpha, variableSelMat,
+                                       setOptions,
+                                       directed,verbose, 
+                                ...)
            },
            
            {

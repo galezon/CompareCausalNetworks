@@ -23,6 +23,8 @@ getGraphMode <- function(method){
     return("DAG")
   }else if(method %in% c("backShift")){
     return("CG")
+  }else if(method %in% c("PythonCDAlgo")){  # python methods should be here
+    return("DAG")
   }else{
     stop(paste("Method", method, "not supported in getGraphMode()"))
   }

@@ -1,13 +1,15 @@
 library(processx)
 
+# Ensure bash wrapper under CompareCausalNetworks\inst\bash
+BASH_WRAPPER_FILE = "runCDAlgo.sh"  # REPLACE
+
 runPythonCDAlgo <- function(
     data_path,
     exp_name,
     setOptions = list(),
     exp_details = "NONE",
     run_id = NULL,
-    results_dir = "./runs",
-    bash_script = system.file("python", "runCD.sh", package = "CompareCausalNetworks")
+    results_dir = "./runs"
 ) {
   
   ensure_file(data_path)
@@ -24,18 +26,21 @@ runPythonCDAlgo <- function(
   out_filename <- create_output_filename(exp_name, exp_details, run_id)
   out_path <- file.path(exp_dir, out_filename)
   
+  bash_script = system.file("bash", BASH_WRAPPER_FILE, package = "CompareCausalNetworks")
   if (bash_script == "") {
-    stop("Could not find bash wrapper via system.file(). Is the CompareCausalNetworks package available?")
+    stop("Could not find bash wrapper via system.file().")
   }
   ensure_file(bash_script)
   
   # Default options
   optionsList <- list(
+    # MANDATORY ARGUMENTS
     "input_csv"   = data_path,
     "output_csv"  = out_path,
     "exp_name"    = exp_name,
     "exp_details" = exp_details,
     "run_id"      = as.character(run_id),
+    # OPTIONAL ARGUMENTS
     "times_2"     = FALSE,
     "times_3"     = FALSE
   )

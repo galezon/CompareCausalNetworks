@@ -1,3 +1,5 @@
+library(digest)
+
 # function to determine number of settings to draw
 drawE <- function(x){
   z <- floor(x)
@@ -18,8 +20,8 @@ ensure_file <- function(path) {
   }
 }
 
-create_output_filename <- function(exp_name, exp_details, run_id) {
-  sprintf("%s_%s_run_%03d.csv", exp_name, exp_details, as.integer(run_id))
+create_output_filename <- function(exp_name, run_id) {
+  sprintf("%s_run_%03d.csv", exp_name, run_id)
 }
 
 write_metadata <- function(results_dir, exp_name, exp_details) {
@@ -68,4 +70,18 @@ optionsListToArgs <- function(optionsList) {
   }), use.names = FALSE)
   
   return(args)
+}
+
+get_data_path <- function(X_or_data_path) {
+  if (is.character(X_or_data_path) && file.exists(X_or_data_path)) {
+    data_path <- X_or_data_path
+  } else if (is.matrix(X_or_data_path) || is.data.frame(X_or_data_path)) {
+    hash <- digest::digest(X_or_data_path, algo = "md5")
+    data_path <- file.path(CACHE_DIR, paste0("data_", hash, ".csv"))
+    if (!file.exists(data_path)) {
+      write.csv(X_or_data_path, data_path, row.names = FALSE)
+    }
+  } else {
+    stop("X must be a data.frame/matrix or an existing CSV file path")
+  }
 }

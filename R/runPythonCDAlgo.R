@@ -1,51 +1,58 @@
-library(reticulate)
+library(processx)
 
-# TODO: clean up hard-coded virtualenv path
-use_condaenv("expertloop")
-
-runPythonCDAlgo <- function(X, parentsOf, alpha, variableSelMat, setOptions, directed, verbose,
-                   result, ...){
-  # only parameters needed to be considered are X and setOptions
-
-  dots <- list(...)
-  if(length(dots) > 0){
-    warning("options provided via '...' not taken")
+runPythonCDAlgo <- function(
+    data_path,
+    exp_name,
+    setOptions = list(),
+    exp_details = "NONE",
+    run_id = NULL,
+    results_dir = "./runs",
+    bash_script = system.file("python", "runCD.sh", package = "CompareCausalNetworks")
+) {
+  
+  ensure_file(data_path)
+  ensure_dir(results_dir)
+  exp_dir <- results_dir
+  write_metadata(exp_dir, exp_name, exp_details)
+  
+  if (is.null(run_id)) {
+    run_id <- get_run_id(exp_dir, exp_name)
+  } else {
+    run_id <- as.integer(run_id)
   }
-
-  source_python(
-    system.file("python", "python_cd_algo.py", package = "CompareCausalNetworks")
+  
+  out_filename <- create_output_filename(exp_name, exp_details, run_id)
+  out_path <- file.path(exp_dir, out_filename)
+  
+  if (bash_script == "") {
+    stop("Could not find bash wrapper via system.file(). Is the CompareCausalNetworks package available?")
+  }
+  ensure_file(bash_script)
+  
+  # Default options
+  optionsList <- list(
+    "input_csv"   = data_path,
+    "output_csv"  = out_path,
+    "exp_name"    = exp_name,
+    "exp_details" = exp_details,
+    "run_id"      = as.character(run_id),
+    "times_2"     = FALSE,
+    "times_3"     = FALSE
   )
+  optionsList <- adjustOptions(availableOptions = optionsList, optionsToSet = setOptions)
   
- # additional options for PC
- optionsList <- list(
-   times_2=FALSE
-                     )
+  # Build arguments vector for processx
+  args <- optionsListToArgs(optionsList)
 
- # adjust according to setOptions if necessary
- optionsList <- adjustOptions(availableOptions = optionsList,
-                               optionsToSet = setOptions)
-
-  pcmat <- cd_algorithm(
-    X=X,
-    times_2=optionsList$times_2,
-    times_3=if (!is.null(optionsList$times_3)) optionsList$times_3 else FALSE
+  message("Running: bash ", paste(shQuote(args), collapse = " "))
+  
+  # Execute the bash wrapper
+  res <- processx::run(
+    "bash",
+    args = c(bash_script, args),
+    echo = TRUE,
+    error_on_status = TRUE
   )
-  
-  if(directed){
-    warning("Removing undirected edges from estimated adjacency matrix.")
-    pcmat <- pcmat * (t(pcmat)==0)
-  }
-  
-  result <- vector("list", length = length(parentsOf))
-  
-  for (k in 1:length(parentsOf)){
-    result[[k]] <- which(as.logical(pcmat[, parentsOf[k]]))
-    attr(result[[k]],"parentsOf") <- parentsOf[k]
-  }
-  
-  if(length(parentsOf) < ncol(X)){
-    pcmat <- pcmat[,parentsOf]
-  }
-  
-  list(resList = result, resMat = pcmat)
+
+  invisible(res)
 }

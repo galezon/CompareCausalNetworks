@@ -6,3 +6,6 @@ cran-comments.md
 scratch.R
 aux
 .Rapp.history
+/R/python_cd_algo.py
+/R/runCDAlgo.R
+/inst/python/python_cd_algo.py

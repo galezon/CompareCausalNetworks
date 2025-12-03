@@ -19,9 +19,6 @@ def main():
     parser.add_argument("--run_id", default=None)
     args = parser.parse_args()
 
-    # DEBUG
-    print(args)
-
     # Load input data
     X = pd.read_csv(args.input_csv).values
     n = X.shape[1]

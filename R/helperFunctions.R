@@ -79,9 +79,12 @@ get_data_path <- function(X_or_data_path) {
     hash <- digest::digest(X_or_data_path, algo = "md5")
     data_path <- file.path(CACHE_DIR, paste0("data_", hash, ".csv"))
     if (!file.exists(data_path)) {
+      message("Encountered new data matrix, hashing.")
       write.csv(X_or_data_path, data_path, row.names = FALSE)
     }
+    
   } else {
     stop("X must be a data.frame/matrix or an existing CSV file path")
   }
+  return(data_path)
 }

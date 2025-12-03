@@ -24,6 +24,7 @@ runPythonCDAlgo <- function(
   out_path <- file.path(RESULTS_DIR, out_filename)
   
   data_path = get_data_path(X)
+  print(data_path)
   
   # should be under find_bash_script()
   bash_script = system.file("bash", BASH_WRAPPER_FILE, package = "CompareCausalNetworks")
@@ -49,7 +50,7 @@ runPythonCDAlgo <- function(
   # Build arguments vector for processx
   args <- optionsListToArgs(optionsList)
 
-  message("Running: bash ", paste(shQuote(args), collapse = " "))
+  message("Running: bash ", bash_script, " ", paste(shQuote(args), collapse = " "))
   
   # Execute the bash wrapper
   res <- processx::run(
